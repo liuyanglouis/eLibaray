@@ -1,0 +1,16 @@
+2026-10-12 10:18:43 [main] INFO  com.elibrary.ELibraryApplication - Starting ELibraryApplication using Java 17.0.19 with PID 23288 (D:\Download\eLibaray\target\classes started by louis in D:\Download\eLibaray)
+2026-10-12 10:18:43 [main] DEBUG com.elibrary.ELibraryApplication - Running with Spring Boot v3.2.4, Spring v6.1.5
+2026-10-12 10:18:43 [main] INFO  com.elibrary.ELibraryApplication - No active profile set, falling back to 1 default profile: "default"
+2026-10-12 10:18:47 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2026-10-12 10:18:47 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2026-10-12 10:18:47 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.19]
+2026-10-12 10:18:47 [main] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring embedded WebApplicationContext
+2026-10-12 10:18:47 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 4744 ms
+2026-10-12 10:18:48 [main] DEBUG c.e.c.s.JwtAuthenticationFilter - Filter 'jwtAuthenticationFilter' configured for use
+2026-10-12 10:18:51 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@2aac8ad7, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@6a4a2090, org.springframework.security.web.context.SecurityContextHolderFilter@70884875, org.springframework.security.web.header.HeaderWriterFilter@2bdcfcf, org.springframework.web.filter.CorsFilter@778c2e7c, org.springframework.security.web.authentication.logout.LogoutFilter@1f9a7684, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@2a5c6b76, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@ff1f465, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@b70fa38, org.springframework.security.web.session.SessionManagementFilter@531a716c, org.springframework.security.web.access.ExceptionTranslationFilter@24a3d414, org.springframework.security.web.access.intercept.AuthorizationFilter@7c5c20ed]
+2026-10-12 10:18:52 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/api'
+2026-10-12 10:18:52 [main] INFO  com.elibrary.ELibraryApplication - Started ELibraryApplication in 10.625 seconds (process running for 13.726)
+2026-10-12 10:18:55 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-10-12 10:18:55 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2026-10-12 10:18:55 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 3 ms
+2026-10-12 10:18:57 [http-nio-8080-exec-7] INFO  o.s.api.AbstractOpenApiResource - Init duration for springdoc-openapi is: 1484 ms

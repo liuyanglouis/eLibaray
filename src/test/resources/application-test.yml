@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  sql:
+    init:
+      mode: never
+
+mybatis:
+  mapper-locations: classpath:com/elibrary/mapper/**/*.xml
+  type-aliases-package: com.elibrary.model.entity
+  configuration:
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com.elibrary: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+elibrary:
+  jwt:
+    secret: dGVzdC1zZWNyZXQta2V5LWZvci1qdW5pdC10ZXN0aW5nLXB1cnBvc2VzLW9ubHktMTIzNDU2Nzg5MA==
+    expiration: 86400000
+  borrow:
+    max-borrow-days: 30
+    max-renew-times: 2
+    max-books-per-user: 5
+  overdue:
+    fine-per-day: 0.50

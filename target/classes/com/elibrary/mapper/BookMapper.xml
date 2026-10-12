@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elibrary.mapper.BookMapper">
+
+    <resultMap id="BookResultMap" type="com.elibrary.model.entity.Book">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="author" column="author"/>
+        <result property="isbn" column="isbn"/>
+        <result property="publisher" column="publisher"/>
+        <result property="publicationYear" column="publication_year"/>
+        <result property="description" column="description"/>
+        <result property="category" column="category" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result property="totalCopies" column="total_copies"/>
+        <result property="availableCopies" column="available_copies"/>
+        <result property="pageCount" column="page_count"/>
+        <result property="language" column="language"/>
+        <result property="format" column="format"/>
+        <result property="fileSize" column="file_size"/>
+        <result property="filePath" column="file_path"/>
+        <result property="coverImagePath" column="cover_image_path"/>
+        <result property="price" column="price"/>
+        <result property="rating" column="rating"/>
+        <result property="reviewCount" column="review_count"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, title, author, isbn, publisher, publication_year, description, category,
+        total_copies, available_copies, page_count, language, format, file_size,
+        file_path, cover_image_path, price, rating, review_count, is_active,
+        created_at, updated_at
+    </sql>
+
+    <sql id="Base_Condition">
+        WHERE is_active = true
+    </sql>
+
+    <select id="selectById" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByIsbn" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE isbn = #{isbn}
+        AND is_active = true
+    </select>
+
+    <select id="selectAll" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectAvailableBooks" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        AND available_copies > 0
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectByAuthor" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        AND LOWER(author) LIKE LOWER(CONCAT('%', #{author}, '%'))
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectByTitle" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        AND LOWER(title) LIKE LOWER(CONCAT('%', #{title}, '%'))
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectByCategory" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        AND category = #{category}
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="searchBooks" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        AND (
+            LOWER(title) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+            OR LOWER(author) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+            OR LOWER(description) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+        )
+        ORDER BY created_at DESC
+    </select>
+
+    <select id="selectWithPagination" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAvailableBooks" resultType="int">
+        SELECT COUNT(*)
+        FROM books
+        WHERE is_active = true
+        AND available_copies > 0
+    </select>
+
+    <select id="countAll" resultType="int">
+        SELECT COUNT(*)
+        FROM books
+        WHERE is_active = true
+    </select>
+
+    <insert id="insert" parameterType="com.elibrary.model.entity.Book" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO books (
+            title, author, isbn, publisher, publication_year, description, category,
+            total_copies, available_copies, page_count, language, format, file_size,
+            file_path, cover_image_path, price, rating, review_count, is_active,
+            created_at, updated_at
+        ) VALUES (
+            #{title}, #{author}, #{isbn}, #{publisher}, #{publicationYear}, #{description}, #{category},
+            #{totalCopies}, #{availableCopies}, #{pageCount}, #{language}, #{format}, #{fileSize},
+            #{filePath}, #{coverImagePath}, #{price}, #{rating}, #{reviewCount}, #{isActive},
+            #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.elibrary.model.entity.Book">
+        UPDATE books
+        SET
+            title = #{title},
+            author = #{author},
+            isbn = #{isbn},
+            publisher = #{publisher},
+            publication_year = #{publicationYear},
+            description = #{description},
+            category = #{category},
+            total_copies = #{totalCopies},
+            available_copies = #{availableCopies},
+            page_count = #{pageCount},
+            language = #{language},
+            format = #{format},
+            file_size = #{fileSize},
+            file_path = #{filePath},
+            cover_image_path = #{coverImagePath},
+            price = #{price},
+            rating = #{rating},
+            review_count = #{reviewCount},
+            is_active = #{isActive},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateAvailableCopies">
+        UPDATE books
+        SET available_copies = #{availableCopies},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="softDelete">
+        UPDATE books
+        SET is_active = false,
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM books
+        WHERE id = #{id}
+    </delete>
+
+    <select id="existsByIsbn" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM books
+        WHERE isbn = #{isbn}
+        AND is_active = true
+        <if test="excludeId != null">
+            AND id != #{excludeId}
+        </if>
+    </select>
+
+    <select id="selectByCriteria" parameterType="com.elibrary.model.dto.BookSearchDTO" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        <if test="title != null and title != ''">
+            AND LOWER(title) LIKE LOWER(CONCAT('%', #{title}, '%'))
+        </if>
+        <if test="author != null and author != ''">
+            AND LOWER(author) LIKE LOWER(CONCAT('%', #{author}, '%'))
+        </if>
+        <if test="category != null">
+            AND category = #{category}
+        </if>
+        <if test="minPublicationYear != null">
+            AND publication_year &gt;= #{minPublicationYear}
+        </if>
+        <if test="maxPublicationYear != null">
+            AND publication_year &lt;= #{maxPublicationYear}
+        </if>
+        <if test="availableOnly != null and availableOnly">
+            AND available_copies > 0
+        </if>
+        <if test="minRating != null">
+            AND rating >= #{minRating}
+        </if>
+        ORDER BY
+        <choose>
+            <when test="sortBy == 'title'">title</when>
+            <when test="sortBy == 'publicationYear'">publication_year</when>
+            <when test="sortBy == 'rating'">rating</when>
+            <otherwise>created_at</otherwise>
+        </choose>
+        <if test="sortOrder != null and sortOrder == 'desc'">
+            DESC
+        </if>
+        <if test="limit != null and offset != null">
+            LIMIT #{limit} OFFSET #{offset}
+        </if>
+    </select>
+
+    <select id="selectByCategoryPaged" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        AND category = #{category}
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countByCategory" resultType="int">
+        SELECT COUNT(*)
+        FROM books
+        WHERE is_active = true
+        AND category = #{category}
+    </select>
+
+    <select id="searchBooksPaged" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        AND (
+            LOWER(title) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+            OR LOWER(author) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+            OR LOWER(description) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+        )
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countSearchBooks" resultType="int">
+        SELECT COUNT(*)
+        FROM books
+        WHERE is_active = true
+        AND (
+            LOWER(title) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+            OR LOWER(author) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+            OR LOWER(description) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+        )
+    </select>
+
+    <select id="selectAvailableBooksPaged" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        AND available_copies > 0
+        ORDER BY created_at DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countAvailableBooksTotal" resultType="int">
+        SELECT COUNT(*)
+        FROM books
+        WHERE is_active = true
+        AND available_copies > 0
+    </select>
+
+    <select id="selectPopularBooks" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        ORDER BY rating DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="selectNewestBooks" resultMap="BookResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM books
+        WHERE is_active = true
+        ORDER BY created_at DESC
+        LIMIT #{limit}
+    </select>
+
+    <select id="existsByIsbnSimple" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM books
+        WHERE isbn = #{isbn}
+    </select>
+
+    <select id="countByCriteria" parameterType="com.elibrary.model.dto.BookSearchDTO" resultType="int">
+        SELECT COUNT(*)
+        FROM books
+        WHERE is_active = true
+        <if test="title != null and title != ''">
+            AND LOWER(title) LIKE LOWER(CONCAT('%', #{title}, '%'))
+        </if>
+        <if test="author != null and author != ''">
+            AND LOWER(author) LIKE LOWER(CONCAT('%', #{author}, '%'))
+        </if>
+        <if test="category != null">
+            AND category = #{category}
+        </if>
+        <if test="minPublicationYear != null">
+            AND publication_year &gt;=  #{minPublicationYear}
+        </if>
+        <if test="maxPublicationYear != null">
+            AND publication_year &lt;=  #{maxPublicationYear}
+        </if>
+        <if test="availableOnly != null and availableOnly">
+            AND available_copies > 0
+        </if>
+        <if test="minRating != null">
+            AND rating >= #{minRating}
+        </if>
+    </select>
+
+</mapper>

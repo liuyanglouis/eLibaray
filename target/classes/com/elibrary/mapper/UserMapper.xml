@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elibrary.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.elibrary.model.entity.User">
+        <id property="id" column="id"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="email" column="email"/>
+        <result property="fullName" column="full_name"/>
+        <result property="phoneNumber" column="phone_number"/>
+        <result property="isActive" column="is_active"/>
+        <result property="maxBorrowCount" column="max_borrow_count"/>
+       <!-- <result property="role" column="role" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/-->
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, username, password, email, full_name, phone_number,
+        is_active, max_borrow_count, role, created_at, updated_at
+    </sql>
+
+    <select id="selectById" resultMap="UserResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM users
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByUsername" resultMap="UserResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM users
+        WHERE username = #{username}
+    </select>
+
+    <select id="selectByEmail" resultMap="UserResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM users
+        WHERE email = #{email}
+    </select>
+
+    <select id="existsByUsername" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM users WHERE username = #{username}
+    </select>
+
+    <select id="existsByEmail" resultType="boolean">
+        SELECT COUNT(*) > 0 FROM users WHERE email = #{email}
+    </select>
+
+    <select id="selectActiveUsers" resultMap="UserResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM users
+        WHERE is_active = true
+    </select>
+
+    <select id="selectByRole" resultMap="UserResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM users
+        WHERE role = #{role}
+    </select>
+
+    <select id="searchUsers" resultMap="UserResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM users
+        WHERE is_active = true
+        AND (
+        LOWER(username) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+        OR LOWER(email) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+        OR LOWER(full_name) LIKE LOWER(CONCAT('%', #{keyword}, '%'))
+        )
+    </select>
+
+    <select id="findAllActiveUsers" resultMap="UserResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM users
+        WHERE is_active = true
+        AND role IN ('USER', 'ADMIN')
+    </select>
+
+    <select id="countActiveUsers" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM users WHERE is_active = true
+    </select>
+
+    <select id="findActiveUserById" resultMap="UserResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM users
+        WHERE is_active = true AND id = #{userId}
+    </select>
+
+    <insert id="insert" parameterType="com.elibrary.model.entity.User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users (
+        username, password, email, full_name, phone_number,
+        is_active, max_borrow_count, role, created_at, updated_at
+        ) VALUES (
+        #{username}, #{password}, #{email}, #{fullName}, #{phoneNumber},
+        #{isActive}, #{maxBorrowCount}, #{role}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.elibrary.model.entity.User">
+        UPDATE users
+        SET
+        username = #{username},
+        password = #{password},
+        email = #{email},
+        full_name = #{fullName},
+        phone_number = #{phoneNumber},
+        is_active = #{isActive},
+        max_borrow_count = #{maxBorrowCount},
+        role = #{role},
+        updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
+
+</mapper>

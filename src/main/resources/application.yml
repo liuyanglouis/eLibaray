@@ -1,0 +1,73 @@
+spring:
+  application:
+    name: e-library
+  autoconfigure:
+    report:
+      enabled: true
+  datasource:
+    jdbcUrl: jdbc:postgresql://localhost:5432/elibrary
+    username: postgres
+    password: 111111
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jackson:
+    time-zone: UTC
+    date-format: yyyy-MM-dd HH:mm:ss
+
+mybatis:
+  mapper-locations: classpath:com/elibrary/mapper/**/*.xml
+  type-aliases-package: com.elibrary.model.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    default-fetch-size: 100
+    default-statement-timeout: 30
+
+logging:
+  level:
+    com.elibrary: DEBUG
+    org.springframework.web: INFO
+    org.mybatis: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/elibrary.log
+    max-size: 10MB
+    max-history: 30
+
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  tomcat:
+    max-threads: 200
+    min-spare-threads: 10
+    connection-timeout: 5000
+
+elibrary:
+  borrow:
+    max-borrow-days: 30
+    max-renew-times: 2
+    max-books-per-user: 5
+  overdue:
+    fine-per-day: 0.50
+  jwt:
+    secret: YTJiM2M0ZDVlNmY3ZzhoOWkwajFrMmwzbTRuNW82cDdxOHI5czB0MXUydjN3NHg1eTZ6N0E4QjlDMEQx
+    expiration: 86400000
+
+ip:
+  counter:
+    exclude-localhost: false
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method

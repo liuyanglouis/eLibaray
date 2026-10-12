@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.elibrary.mapper.BorrowRecordMapper">
+
+    <resultMap id="BorrowRecordResultMap" type="com.elibrary.model.entity.BorrowRecord">
+        <id property="id" column="id"/>
+        <result property="borrowDate" column="borrow_date"/>
+        <result property="dueDate" column="due_date"/>
+        <result property="returnDate" column="return_date"/>
+        <result property="status" column="status" typeHandler="org.apache.ibatis.type.EnumTypeHandler"/>
+        <result property="renewCount" column="renew_count"/>
+        <result property="maxRenewCount" column="max_renew_count"/>
+        <result property="overdueDays" column="overdue_days"/>
+        <result property="fineAmount" column="fine_amount"/>
+        <result property="isFinePaid" column="is_fine_paid"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <association property="user" javaType="com.elibrary.model.entity.User">
+            <id property="id" column="user_id"/>
+            <result property="username" column="user_username"/>
+            <result property="email" column="user_email"/>
+            <result property="fullName" column="user_full_name"/>
+        </association>
+        <association property="book" javaType="com.elibrary.model.entity.Book">
+            <id property="id" column="book_id"/>
+            <result property="title" column="book_title"/>
+            <result property="author" column="book_author"/>
+        </association>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        br.id, br.user_id, br.book_id, br.borrow_date, br.due_date, br.return_date,
+        br.status, br.renew_count, br.max_renew_count, br.overdue_days,
+        br.fine_amount, br.is_fine_paid, br.created_at, br.updated_at
+    </sql>
+
+    <sql id="Join_Columns">
+        u.id AS user_id, u.username AS user_username, u.email AS user_email, u.full_name AS user_full_name,
+        b.id AS book_id, b.title AS book_title, b.author AS book_author
+    </sql>
+
+    <sql id="Join_Query">
+        FROM borrow_records br
+        LEFT JOIN users u ON br.user_id = u.id
+        LEFT JOIN books b ON br.book_id = b.id
+    </sql>
+
+    <select id="selectById" resultMap="BorrowRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>, <include refid="Join_Columns"/>
+        <include refid="Join_Query"/>
+        WHERE br.id = #{id}
+    </select>
+
+    <select id="selectByUserId" resultMap="BorrowRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>, <include refid="Join_Columns"/>
+        <include refid="Join_Query"/>
+        WHERE br.user_id = #{userId}
+        ORDER BY br.borrow_date DESC
+    </select>
+
+    <select id="selectByBookId" resultMap="BorrowRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>, <include refid="Join_Columns"/>
+        <include refid="Join_Query"/>
+        WHERE br.book_id = #{bookId}
+        ORDER BY br.borrow_date DESC
+    </select>
+
+    <select id="selectByUserIdAndStatus" resultMap="BorrowRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>, <include refid="Join_Columns"/>
+        <include refid="Join_Query"/>
+        WHERE br.user_id = #{userId}
+        AND br.status = #{status}
+        ORDER BY br.borrow_date DESC
+    </select>
+
+    <select id="selectActiveBorrow" resultMap="BorrowRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>, <include refid="Join_Columns"/>
+        <include refid="Join_Query"/>
+        WHERE br.user_id = #{userId}
+        AND br.book_id = #{bookId}
+        AND br.status = 'BORROWED'
+    </select>
+
+    <select id="selectOverdueRecords" resultMap="BorrowRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>, <include refid="Join_Columns"/>
+        <include refid="Join_Query"/>
+        WHERE br.due_date &lt; #{now}
+        AND br.status = 'BORROWED'
+    </select>
+
+    <select id="selectActiveBorrows" resultMap="BorrowRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>, <include refid="Join_Columns"/>
+        <include refid="Join_Query"/>
+        WHERE br.status = 'BORROWED'
+        AND br.return_date IS NULL
+    </select>
+
+    <select id="selectByUserIdAndBorrowDateBetween" resultMap="BorrowRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>, <include refid="Join_Columns"/>
+        <include refid="Join_Query"/>
+        WHERE br.user_id = #{userId}
+        AND br.borrow_date &gt;= #{startDate}
+        AND br.borrow_date &lt;= #{endDate}
+        ORDER BY br.borrow_date DESC
+    </select>
+
+    <select id="selectActiveBorrowsByBookIdPaged" resultMap="BorrowRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>, <include refid="Join_Columns"/>
+        <include refid="Join_Query"/>
+        WHERE br.book_id = #{bookId}
+        AND br.status = 'BORROWED'
+        ORDER BY br.borrow_date DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countActiveBorrowsByBookIdForPage" resultType="int">
+        SELECT COUNT(*)
+        FROM borrow_records
+        WHERE book_id = #{bookId}
+        AND status = 'BORROWED'
+    </select>
+
+    <select id="selectByUserIdPaged" resultMap="BorrowRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>, <include refid="Join_Columns"/>
+        <include refid="Join_Query"/>
+        WHERE br.user_id = #{userId}
+        ORDER BY br.borrow_date DESC
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <select id="countByUserId" resultType="int">
+        SELECT COUNT(*)
+        FROM borrow_records
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectDueSoonRecords" resultMap="BorrowRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>, <include refid="Join_Columns"/>
+        <include refid="Join_Query"/>
+        WHERE br.status = 'BORROWED'
+        AND br.due_date BETWEEN #{startDate} AND #{endDate}
+    </select>
+
+    <insert id="insert" parameterType="com.elibrary.model.entity.BorrowRecord" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO borrow_records (
+        user_id, book_id, borrow_date, due_date, return_date,
+        status, renew_count, max_renew_count, overdue_days,
+        fine_amount, is_fine_paid, created_at, updated_at
+        ) VALUES (
+        #{user.id}, #{book.id}, #{borrowDate}, #{dueDate}, #{returnDate},
+        #{status}, #{renewCount}, #{maxRenewCount}, #{overdueDays},
+        #{fineAmount}, #{isFinePaid}, #{createdAt}, #{updatedAt}
+        )
+    </insert>
+
+    <update id="update" parameterType="com.elibrary.model.entity.BorrowRecord">
+        UPDATE borrow_records
+        SET
+        borrow_date = #{borrowDate},
+        due_date = #{dueDate},
+        return_date = #{returnDate},
+        status = #{status},
+        renew_count = #{renewCount},
+        max_renew_count = #{maxRenewCount},
+        overdue_days = #{overdueDays},
+        fine_amount = #{fineAmount},
+        is_fine_paid = #{isFinePaid},
+        updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        UPDATE borrow_records
+        SET status = #{status},
+        updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateReturnDate">
+        UPDATE borrow_records
+        SET return_date = NOW(),
+        status = 'RETURNED',
+        updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateDueDate">
+        UPDATE borrow_records
+        SET due_date = due_date + (#{days} || ' days')::INTERVAL,
+        updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM borrow_records WHERE id = #{id}
+    </delete>
+
+    <select id="countActiveBorrowsByUserId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM borrow_records
+        WHERE user_id = #{userId}
+        AND status = 'BORROWED'
+    </select>
+
+    <select id="countActiveBorrowsByBookId" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM borrow_records
+        WHERE book_id = #{bookId}
+        AND status = 'BORROWED'
+    </select>
+
+    <select id="selectNotReturnedRecord" resultMap="BorrowRecordResultMap">
+        SELECT <include refid="Base_Column_List"/>, <include refid="Join_Columns"/>
+        <include refid="Join_Query"/>
+        WHERE br.user_id = #{userId}
+        AND br.book_id = #{bookId}
+        AND br.status IN ('BORROWED', 'OVERDUE')
+    </select>
+
+</mapper>
